@@ -78,7 +78,7 @@ export const getHandler = async (
     values[Math.floor(Math.random() * values.length)];
 
   const getObject = async (type: string): Promise<string[]> => {
-    const key = `${apiKey}/${type}.json`;
+    const key = `samples/${apiKey}/${type}.json`;
 
     const client = new S3Client({ region: REGION_NAME });
     const { Body } = await client.send(
@@ -107,13 +107,26 @@ export const getHandler = async (
     }
   };
 
-  const values: string[] = await Promise.all(
-    types.map((type: string) =>
-      getObject(type).then((values: string[]) => randomChoice(values)),
-    ),
-  );
-  const name = values.join(' ');
-  console.debug('Generated name:', { apiKey, types, name });
+  // const values: string[] = await Promise.all(
+  //   types.map((type: string) =>
+  //     getObject(type).then((values: string[]) => randomChoice(values)),
+  //   ),
+  // );
+  // const name = values.join(' ');
+  // console.debug('Generated name:', { apiKey, types, name });
+  const map = new Map<string, string>();
+  for (const type of types) {
+    const object = await getObject(type);
+    const value = randomChoice(object);
+    map.set(type, value);
+  }
+  const result = Object.fromEntries(map);
+  const name = types.map((type: string) => map.get(type)).join(' ');
+  const body = JSON.stringify({
+    result,
+    name,
+  });
+  console.debug('Generated name:', { apiKey, types, name, result });
 
   return {
     statusCode: 200,
