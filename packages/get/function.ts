@@ -19,14 +19,15 @@ export const getHandler = async (
     throw Error('No `headers` data.');
   }
 
-  const { Authorization } = headers;
-  if (!Authorization) {
+  const { Authorization, authorization } = headers;
+  if (!Authorization && !authorization) {
     console.debug('No `Authorization` header.');
   }
-  const apiKey = `samples/${
-    Authorization ? Authorization.replace('Bearer ', '') : '_'
-  }`;
-
+  const apiKey = Authorization
+    ? Authorization.replace('Bearer ', '')
+    : authorization
+      ? authorization.replace('Bearer ', '')
+      : '_';
   // const { multiValueQueryStringParameters } = event;
   // if (!multiValueQueryStringParameters) {
   //   console.warn('Bad request:', { multiValueQueryStringParameters });
