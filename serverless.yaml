@@ -1,0 +1,53 @@
+service: random-name-generator
+frameworkVersion: '3'
+
+configValidationMode: error
+useDotenv: true
+deprecationNotificationMode: warn:summary
+
+provider:
+  name: aws
+  stage: ${sls:stage}
+  region: ap-northeast-2
+  runtime: nodejs20.x
+  runtimeManagement: auto
+  memorySize: 128
+  timeout: 10
+  architecture: arm64
+  iam:
+    role: ${env:AWS_ROLE}
+
+  httpApi:
+    payload: '2.0'
+    metrics: true
+    cors: true
+    shouldStartNameWithService: true
+
+functions:
+  public:
+    handler: dist/function.handler
+    events:
+      - httpApi:
+          method: GET
+          path: /
+      - httpApi:
+          method: POST
+          path: /
+      - httpApi:
+          method: PUT
+          path: /
+      - httpApi:
+          method: PATCH
+          path: /
+      - httpApi:
+          method: DELETE
+          path: /
+    environment:
+      REGION_NAME: ${env:REGION_NAME}
+      BUCKET_NAME: ${env:BUCKET_NAME}
+
+package:
+  patterns:
+    - '!**'
+    - packages/**/*.ts
+    - dist/*.js
